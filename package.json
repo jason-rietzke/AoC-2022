@@ -5,8 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node .",
+		"serve": "npx serve .",
 		"asbuild:debug": "asc main.ts --target debug",
-		"asbuild:release": "asc main.ts --target release",
+		"asbuild:release": "asc main.ts --target release --optimize",
 		"asbuild": "npm run asbuild:debug && npm run asbuild:release"
 	},
 	"author": "",
