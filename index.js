@@ -29,11 +29,14 @@ for (let i = 0; i < days.length; i++) {
 	const day = days[i];
 	const inputData = data[i].input;
 	const inputDataPointer = __newString(inputData);
+	const start = performance.now();
 	const puzzlesPointer = wasmInstance.exports[day](inputDataPointer);
+	const elapsed = performance.now() - start;
 	const puzzles = __getArray(puzzlesPointer);
 	console.log(`\n========== DAY ${i + 1} ==========`);
 	console.log("Puzzle 01");
-	console.log("   ", puzzles[0] ?? "Not impolemented");
+	console.log("   ", puzzles[0] ?? "Not implemented");
 	console.log("Puzzle 02");
-	console.log("   ", puzzles[1] ?? "Not impolemented");
+	console.log("   ", puzzles[1] ?? "Not implemented");
+	console.log(`took: ${elapsed}ms`);
 }
