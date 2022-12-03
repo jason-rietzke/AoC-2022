@@ -17,11 +17,7 @@ jobs:
             - name: Install dependencies
               run: npm install
             - name: Build
-              run: npm run asbuild:release
-            - name: Move
-              run: |
-                  mkdir dist
-                  cp -r !(dist) /dist
+              run: npm run build
             - name: Deploy pages
               uses: crazy-max/ghaction-github-pages@v3
               with:
