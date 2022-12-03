@@ -44,7 +44,7 @@
 					test_input: await fetch(`./${day}/test_input.txt`).then(async (r) => await r.text()),
 				};
 			}
-			const data = [await getData("day01"), await getData("day02")];
+			const data = [await getData("day01"), await getData("day02"), await getData("day03")];
 
 			const days = Object.keys(wasm).filter((key) => key.startsWith("day"));
 			for (let i = 0; i < days.length; i++) {
