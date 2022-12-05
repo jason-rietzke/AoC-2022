@@ -1,4 +1,4 @@
-export function day01(input: string): i32[] {
+export function day01(input: string): string[] {
 	const elves = new Array<i32>(1);
 	for (let i = 0; i < elves.length; ++i) {
 		elves[i] = 0;
@@ -13,7 +13,7 @@ export function day01(input: string): i32[] {
 		}
 	}
 	const sortedElves = elves.sort((a, b) => a - b);
-	return [puzzle01(sortedElves), puzzle02(sortedElves)];
+	return [puzzle01(sortedElves).toString(), puzzle02(sortedElves).toString()];
 }
 
 function puzzle01(sortedElves: i32[]): i32 {

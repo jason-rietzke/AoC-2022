@@ -7,6 +7,10 @@ const imports = {
 		abort(_msg, _file, line, column) {
 			console.error("abort called at index.ts:" + line + ":" + column);
 		},
+		log(msg) {
+			const { __getString } = wasmInstance.exports;
+			console.log(__getString(msg));
+		},
 	},
 };
 
@@ -23,7 +27,7 @@ for (const dayDir of dayDirs) {
 }
 
 const wasmInstance = await loader.instantiate(wasm, imports);
-const { __newString, __getArray } = wasmInstance.exports;
+const { __newString, __getArray, __getString } = wasmInstance.exports;
 const days = Object.keys(wasmInstance.exports).filter((key) => key.startsWith("day"));
 for (let i = 0; i < days.length; i++) {
 	const day = days[i];
@@ -35,8 +39,8 @@ for (let i = 0; i < days.length; i++) {
 	const puzzles = __getArray(puzzlesPointer);
 	console.log(`\n========== DAY ${i + 1} ==========`);
 	console.log("Puzzle 01");
-	console.log("   ", puzzles[0] ?? "Not implemented");
+	console.log("   ", __getString(puzzles[0]) ?? "Not implemented");
 	console.log("Puzzle 02");
-	console.log("   ", puzzles[1] ?? "Not implemented");
+	console.log("   ", __getString(puzzles[1]) ?? "Not implemented");
 	console.log(`took: ${elapsed}ms`);
 }

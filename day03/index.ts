@@ -1,6 +1,6 @@
-export function day03(input: string): i32[] {
+export function day03(input: string): string[] {
 	const rucksacks = input.split("\n");
-	return [puzzle01(rucksacks), puzzle02(rucksacks)];
+	return [puzzle01(rucksacks).toString(), puzzle02(rucksacks).toString()];
 }
 
 function puzzle01(rucksacks: string[]): i32 {
