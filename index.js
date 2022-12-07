@@ -31,13 +31,13 @@ const { __newString, __getArray, __getString } = wasmInstance.exports;
 const days = Object.keys(wasmInstance.exports).filter((key) => key.startsWith("day"));
 for (let i = 0; i < days.length; i++) {
 	const day = days[i];
+	console.log(`\n========== DAY ${i + 1} ==========`);
 	const inputData = data[i].input;
 	const inputDataPointer = __newString(inputData);
 	const start = performance.now();
 	const puzzlesPointer = wasmInstance.exports[day](inputDataPointer);
 	const elapsed = performance.now() - start;
 	const puzzles = __getArray(puzzlesPointer);
-	console.log(`\n========== DAY ${i + 1} ==========`);
 	console.log("Puzzle 01");
 	console.log("   ", __getString(puzzles[0]) ?? "Not implemented");
 	console.log("Puzzle 02");
