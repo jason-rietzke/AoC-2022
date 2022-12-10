@@ -2,26 +2,23 @@ import { log } from "../main";
 
 export function day09(input: string): string[] {
 	const movements = parseMovements(input);
-	return [puzzle01(movements).toString()];
+	const mapSizes = getMapSizes(movements);
+	const startPos = [mapSizes[2] * -1, mapSizes[3] * -1];
+	return [puzzle01(movements, mapSizes, startPos).toString(), puzzle02(movements, mapSizes, startPos).toString()];
 }
 
-function puzzle01(movements: Movement[]): i32 {
-	const gridSizes = getGridSizes(movements);
-	const startPos = [gridSizes[2] * -1, gridSizes[3] * -1];
-	const grid: i32[][] = [];
-	for (let y = 0; y < gridSizes[1] - gridSizes[3] + 1; y++) {
-		grid[y] = new Array<i32>(gridSizes[0] - gridSizes[2] + 1);
-		for (let x = 0; x < grid[y].length; x++) {
-			grid[y][x] = 0;
-		}
-	}
-	simulateMovements(movements, startPos, grid);
-	const visitedFields = countVisitedFields(grid);
+function puzzle01(movements: Movement[], mapSizes: i32[], startPos: i32[]): i32 {
+	const rope = new Rope(movements, 2, startPos, [mapSizes[0] - mapSizes[2] + 1, mapSizes[1] - mapSizes[3] + 1]);
+	rope.simulate();
+	const visitedFields = countVisitedFields(rope.tail.map);
 	return visitedFields;
 }
 
-function puzzle02(): i32 {
-	return 0;
+function puzzle02(movements: Movement[], mapSizes: i32[], startPos: i32[]): i32 {
+	const rope = new Rope(movements, 10, startPos, [mapSizes[0] - mapSizes[2] + 1, mapSizes[1] - mapSizes[3] + 1]);
+	rope.simulate();
+	const visitedFields = countVisitedFields(rope.tail.map);
+	return visitedFields;
 }
 
 function parseMovements(input: string): Movement[] {
@@ -33,7 +30,7 @@ function parseMovements(input: string): Movement[] {
 	return movements;
 }
 
-function getGridSizes(movements: Movement[]): i32[] {
+function getMapSizes(movements: Movement[]): i32[] {
 	let maxX = 0;
 	let maxY = 0;
 	let minX = 0;
@@ -62,91 +59,16 @@ function getGridSizes(movements: Movement[]): i32[] {
 	return [maxX, maxY, minX, minY];
 }
 
-function simulateMovements(movements: Movement[], startPos: i32[], grid: i32[][]): void {
-	let head: i32[] = [startPos[0], startPos[1]];
-	let tail: i32[] = [startPos[0], startPos[1]];
-	grid[tail[1]][tail[0]] += 1;
-	for (let i = 0; i < movements.length; i++) {
-		const movement = movements[i];
-		if (movement.isHorizontal()) {
-			if (movement.isRight()) {
-				for (let x = 0; x < movement.distance; x++) {
-					const prevHead = [head[0], head[1]];
-					head[0] += 1;
-					if (isDistant(head, tail)) {
-						tail = prevHead;
-						grid[tail[1]][tail[0]] += 1;
-					}
-				}
-			} else {
-				for (let x = 0; x < movement.distance; x++) {
-					const prevHead = [head[0], head[1]];
-					head[0] -= 1;
-					if (isDistant(head, tail)) {
-						tail = prevHead;
-						grid[tail[1]][tail[0]] += 1;
-					}
-				}
-			}
-		} else if (movement.isVertical()) {
-			if (movement.isUp()) {
-				for (let y = 0; y < movement.distance; y++) {
-					const prevHead = [head[0], head[1]];
-					head[1] += 1;
-					if (isDistant(head, tail)) {
-						tail = prevHead;
-						grid[tail[1]][tail[0]] += 1;
-					}
-				}
-			} else {
-				for (let y = 0; y < movement.distance; y++) {
-					const prevHead = [head[0], head[1]];
-					head[1] -= 1;
-					if (isDistant(head, tail)) {
-						tail = prevHead;
-						grid[tail[1]][tail[0]] += 1;
-					}
-				}
-			}
-		}
-	}
-}
-
-function isDistant(pos1: i32[], pos2: i32[]): boolean {
-	const xOff = Math.abs(pos1[0] - pos2[0]);
-	const yOff = Math.abs(pos1[1] - pos2[1]);
-	return Math.max(xOff, yOff) > 1;
-}
-
-function countVisitedFields(grid: i32[][]): i32 {
+function countVisitedFields(map: i32[][]): i32 {
 	let count = 0;
-	for (let y = 0; y < grid.length; y++) {
-		for (let x = 0; x < grid[y].length; x++) {
-			if (grid[y][x] > 0) {
+	for (let y = 0; y < map.length; y++) {
+		for (let x = 0; x < map[y].length; x++) {
+			if (map[y][x] > 0) {
 				count++;
 			}
 		}
 	}
 	return count;
-}
-
-function print(grid: i32[][], numbers: boolean = false): void {
-	let lines: string[] = [];
-	for (let y = 0; y < grid.length; y++) {
-		let line = "";
-		for (let x = 0; x < grid[y].length; x++) {
-			if (numbers) {
-				line += grid[y][x].toString();
-			} else {
-				line += grid[y][x] == 0 ? "." : "#";
-			}
-		}
-		lines.push(line);
-	}
-	lines = lines.reverse();
-	for (let i = 0; i < lines.length; i++) {
-		log(lines[i]);
-	}
 }
 
 class Movement {
@@ -175,5 +97,130 @@ class Movement {
 	}
 	isHorizontal(): boolean {
 		return this.isLeft() || this.isRight();
+	}
+}
+
+class Rope {
+	movements: Movement[] = [];
+	currentMovement: Movement;
+	knots: Knot[] = [];
+	head: Knot;
+	tail: Knot;
+
+	constructor(movements: Movement[], ropeLength: i32, startPos: i32[], mapSize: i32[]) {
+		this.movements = movements;
+		this.currentMovement = movements[0];
+		const knots: Knot[] = [];
+		for (let i = 0; i < ropeLength; i++) {
+			const knot = new Knot(null, null, mapSize, startPos);
+			if (i > 0) {
+				knots[i - 1].next = knot;
+				knot.prev = knots[i - 1];
+			}
+			knots.push(knot);
+		}
+		this.knots = knots;
+		this.head = knots[0];
+		this.tail = knots[knots.length - 1];
+		for (let i = 0; i < this.knots.length; i++) {
+			this.knots[i].rope = this;
+		}
+	}
+
+	simulate(): void {
+		for (let i = 0; i < this.movements.length; i++) {
+			const movement = this.movements[i];
+			this.currentMovement = movement;
+			for (let d = 0; d < movement.distance; d++) {
+				if (movement.isUp()) {
+					this.head.move([0, 1]);
+				} else if (movement.isDown()) {
+					this.head.move([0, -1]);
+				} else if (movement.isLeft()) {
+					this.head.move([-1, 0]);
+				} else if (movement.isRight()) {
+					this.head.move([1, 0]);
+				}
+			}
+		}
+	}
+}
+
+class Knot {
+	rope: Rope | null = null;
+	prev: Knot | null = null;
+	next: Knot | null = null;
+	map: i32[][] = [];
+	pos: i32[];
+
+	constructor(prev: Knot | null, next: Knot | null, mapSize: i32[], pos: i32[]) {
+		this.prev = prev;
+		this.next = next;
+		this.pos = [pos[0], pos[1]];
+		for (let y = 0; y < mapSize[1]; y++) {
+			this.map.push([]);
+			for (let x = 0; x < mapSize[0]; x++) {
+				this.map[y].push(0);
+			}
+		}
+		this.map[pos[1]][pos[0]] += 1;
+	}
+
+	move(pos: i32[]): void {
+		this.pos[0] += pos[0];
+		this.pos[1] += pos[1];
+		this.map[this.pos[1]][this.pos[0]] += 1;
+		if (!this.next) return;
+		this.next!.simulate();
+	}
+
+	simulate(): void {
+		if (!this.prev) return;
+		if (this.isDistant()) {
+			const knotIsInSameRowOrColumn = this.prev!.pos[0] == this.pos[0] || this.prev!.pos[1] == this.pos[1];
+			if (knotIsInSameRowOrColumn) {
+				if (this.prev!.pos[0] > this.pos[0]) {
+					this.move([1, 0]);
+				} else if (this.prev!.pos[0] < this.pos[0]) {
+					this.move([-1, 0]);
+				} else if (this.prev!.pos[1] > this.pos[1]) {
+					this.move([0, 1]);
+				} else if (this.prev!.pos[1] < this.pos[1]) {
+					this.move([0, -1]);
+				}
+			} else {
+				const xDist = this.prev!.pos[0] - this.pos[0];
+				const yDist = this.prev!.pos[1] - this.pos[1];
+				const xDir = xDist > 0 ? 1 : -1;
+				const yDir = yDist > 0 ? 1 : -1;
+				this.move([xDir, yDir]);
+			}
+		}
+	}
+
+	isDistant(): boolean {
+		if (!this.prev) return false;
+		const xOff = Math.abs(this.pos[0] - this.prev!.pos[0]);
+		const yOff = Math.abs(this.pos[1] - this.prev!.pos[1]);
+		return Math.max(xOff, yOff) > 1;
+	}
+
+	print(char: string = "#", numbers: boolean = false): void {
+		let lines: string[] = [];
+		for (let y = 0; y < this.map.length; y++) {
+			let line = "";
+			for (let x = 0; x < this.map[y].length; x++) {
+				if (numbers) {
+					line += this.map[y][x].toString();
+				} else {
+					line += this.map[y][x] == 0 ? "." : char;
+				}
+			}
+			lines.push(line);
+		}
+		lines = lines.reverse();
+		for (let i = 0; i < lines.length; i++) {
+			log(lines[i]);
+		}
 	}
 }
