@@ -84,7 +84,8 @@
 				puzzle2.innerText = `Puzzle 2: ${solutions[1] ?? "Not implemented"}`;
 				section.appendChild(puzzle2);
 				const timeTaken = document.createElement("div");
-				timeTaken.innerText = `took: ${time.toFixed(2)}ms`;
+				timeTaken.innerText = `    took: ${time.toFixed(2)}ms`;
+				timeTaken.style.whiteSpace = "pre";
 				section.appendChild(timeTaken);
 				document.body.appendChild(section);
 			}

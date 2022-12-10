@@ -38,9 +38,7 @@ for (let i = 0; i < days.length; i++) {
 	const puzzlesPointer = wasmInstance.exports[day](inputDataPointer);
 	const elapsed = performance.now() - start;
 	const puzzles = __getArray(puzzlesPointer);
-	console.log("Puzzle 01");
-	console.log("   ", __getString(puzzles[0]) ?? "Not implemented");
-	console.log("Puzzle 02");
-	console.log("   ", __getString(puzzles[1]) ?? "Not implemented");
-	console.log(`took: ${elapsed}ms`);
+	console.log("Puzzle 01:", __getString(puzzles[0]) ?? "Not implemented");
+	console.log("Puzzle 02:", __getString(puzzles[1]) ?? "Not implemented");
+	console.log(`     took: ${elapsed}ms`);
 }

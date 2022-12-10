@@ -40,9 +40,9 @@ function puzzle02(instructions: string[]): string {
 			xRegister += parseModification(instruction);
 		}
 	}
-	for (let i = 0; i < rows.length; i++) {
-		log(rows[i]);
-	}
+	// for (let i = 0; i < rows.length; i++) {
+	// 	log(rows[i]);
+	// }
 	return "PCPBKAPJ";
 }
 
