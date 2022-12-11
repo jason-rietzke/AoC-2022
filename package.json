@@ -1,0 +1,27 @@
+{
+	"name": "aoc-2022",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node .",
+		"serve": "npx serve .",
+		"build": "npm run asbuild:release && mkdir dist && cp -r `ls | grep -v dist` dist",
+		"asbuild:debug": "asc main.ts --target debug",
+		"asbuild:release": "asc main.ts --target release --optimize",
+		"asbuild": "npm run asbuild:debug && npm run asbuild:release"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@assemblyscript/loader": "^0.24.1",
+		"assemblyscript": "^0.24.1"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./build/release.js",
+			"types": "./build/release.d.ts"
+		}
+	}
+}

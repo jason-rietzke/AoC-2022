@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Advent of Code 2022</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			body {
+				background-color: #121315;
+				color: #f0f0f0;
+				font-family: "Courier New", Courier, monospace;
+			}
+			h1 {
+				text-align: center;
+			}
+			p#made {
+				text-align: center;
+				translate: 0.3s ease;
+				position: absolute;
+				top: 0.5em;
+				right: 0.5em;
+			}
+			a {
+				color: #c0c0c0;
+				text-decoration: none;
+			}
+			a:hover {
+				color: #ffffff;
+				font-weight: bold;
+			}
+			section {
+				margin: 0 auto;
+				max-width: 800px;
+				padding: 2em;
+				border-bottom: 1px solid #f0f0f0;
+			}
+		</style>
+		<script type="module">
+			import * as wasm from "./build/release.js";
+
+			async function getData(day) {
+				return {
+					input: await fetch(`./${day}/input.txt`).then(async (r) => await r.text()),
+					test_input: await fetch(`./${day}/test_input.txt`).then(async (r) => await r.text()),
+				};
+			}
+			const data = [
+				await getData("day01"),
+				await getData("day02"),
+				await getData("day03"),
+				await getData("day04"),
+				await getData("day05"),
+				await getData("day06"),
+				await getData("day07"),
+				await getData("day08"),
+				await getData("day09"),
+				await getData("day10"),
+				await getData("day11"),
+			];
+
+			const days = Object.keys(wasm).filter((key) => key.startsWith("day"));
+			for (let i = 0; i < days.length; i++) {
+				const day = days[i];
+				const inputData = data[i].input;
+				const startTime = performance.now();
+				const puzzles = wasm[day](inputData);
+				const endTime = performance.now();
+				generateSection(i + 1, puzzles, endTime - startTime);
+			}
+
+			function generateSection(day, solutions, time) {
+				const section = document.createElement("section");
+				const h2 = document.createElement("h2");
+				h2.innerText = `Day ${day}`;
+				section.appendChild(h2);
+				const a = document.createElement("a");
+				a.href = `https://adventofcode.com/2022/day/${day}`;
+				a.innerText = `https://adventofcode.com/2022/day/${day}`;
+				a.style = "position: relative; top: -0.8em;";
+				section.appendChild(a);
+				const puzzle1 = document.createElement("div");
+				puzzle1.innerText = `Puzzle 1: ${solutions[0] ?? "Not implemented"}`;
+				section.appendChild(puzzle1);
+				const puzzle2 = document.createElement("div");
+				puzzle2.innerText = `Puzzle 2: ${solutions[1] ?? "Not implemented"}`;
+				section.appendChild(puzzle2);
+				const timeTaken = document.createElement("div");
+				timeTaken.innerText = `    took: ${time.toFixed(2)}ms`;
+				timeTaken.style.whiteSpace = "pre";
+				section.appendChild(timeTaken);
+				document.body.appendChild(section);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Advent of Code 2022</h1>
+		<p id="made">Made with ♥ by <a href="https://github.com/jason-rietzke">Json Rietzke</a></p>
+	</body>
+</html>
